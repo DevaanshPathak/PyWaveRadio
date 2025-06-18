@@ -1,112 +1,95 @@
-# PyWaveRadio 📻
+# 📻 PyWaveRadio TUI
 
-**PyWaveRadio** is a terminal-based AM/FM/Shortwave mock radio tuner built with Python and [Textual](https://textual.textualize.io/). It simulates frequency tuning, audio playback, station scanning, bookmarking, and even displays a live waveform visualizer — all without requiring an actual SDR device.
+**PyWaveRadio** is a Textual-based TUI (Text User Interface) SDR radio simulator that lets you tune virtual radio frequencies with a classic look and feel.
 
-> 🚧 This project currently uses mocked audio and frequency data. Real SDR integration (e.g., via SoapySDR) is planned for later versions.
-
----
-
-## 🎯 Features
-
-- 🎛️ TUI interface for tuning and navigation
-- 🎧 Frequency-based tone simulation (mock audio)
-- 🔁 Scan mode with station auto-tuning
-- 📌 Station bookmarking and persistence
-- 📈 Waveform visualization of played tone
-- 🧪 Built for Hack Club’s Solder program
+It supports real SDR input via RTL-SDR and mock data from Hack Club's Waveband server — perfect for demos, exploration, and learning!
 
 ---
 
-## 🧰 Tech Stack
+## ✨ Features
 
-- **Python 3.9**
-- [Textual](https://github.com/Textualize/textual)
-- NumPy, SciPy
-- sounddevice (for tone playback)
+- 🎛️ Frequency tuning (AM, SW, FM bands)
+- 🔖 Bookmark stations
+- 🔍 Frequency scanning mode
+- 🎵 Audio tone simulation per frequency
+- 📈 Dynamic waveform visualization (live IQ or simulated)
+- 💾 Saves last frequency tuned (`config.json`)
+- 💻 Fully works offline with mock data
+- 🧪 Real hardware support via `RTL_TCPDriver` (optional)
 
 ---
 
-## 🚀 Getting Started
+## 🚦 How it works
 
-### 1. Clone the Repo
+- **Default mode**: Pulls **mock IQ data from Hack Club’s Waveband server** (offline, simulated)
+- **Real SDR mode**: If RTL-SDR is connected and SoapySDR is installed, it uses **live IQ samples** via `rtl_tcp`
+
+> 🔌 Auto-switches to mock data if no device is detected!
+
+---
+
+## 🧰 Installation
+
+1. **Clone the repo**
+    ```bash
+    git clone https://github.com/yourname/pywaveradio
+    cd pywaveradio
+    ```
+
+2. **Install dependencies**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. **(Optional) Install RTL-SDR support**
+    - Install [SoapySDR](https://github.com/pothosware/SoapySDR)
+    - Install [SoapyRTLSDR plugin](https://github.com/pothosware/SoapyRTLSDR)
+    - Connect an RTL-SDR dongle via USB
+
+---
+
+## ▶️ Run the App
 
 ```bash
-git clone https://github.com/yourusername/PyWaveRadio.git
-cd PyWaveRadio
+python run_radio.py
 ````
 
-### 2. Create a Virtual Environment
-
-```bash
-python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-```
-
-### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run the App
-
-```bash
-python run.py
-```
+Use `+` / `-` keys or buttons to change frequencies.
+Use preset buttons (AM / SW / FM) to jump to bands.
+Click "🔖 Save" to bookmark current frequency.
 
 ---
 
-## 🗂️ Project Structure
+## 📁 Project Structure
 
 ```
 PyWaveRadio/
-├── run.py                 # Entry point for the TUI app
-├── requirements.txt
-├── README.md
-├── tui/
-│   ├── app.py             # Main TUI interface
-│   └── style.css          # UI styling
+├── run_radio.py           # Entry point
 ├── radio/
-│   ├── audio_simulator.py # Plays frequency-based tones
-│   ├── scan.py            # Simulates scanning stations
-│   ├── bookmarks.py       # Save/load bookmarks
-│   └── visualizer.py      # Waveform visualizer
-└── devlogs/
-    ├── day1.txt
-    ├── day2.txt
-    └── day3.txt
+│   ├── tui_app.py         # TUI logic
+│   ├── audio_simulator.py # Beep tone logic
+│   └── rtl_driver.py      # SDR + mock IQ sample logic
+├── config.json            # Stores last frequency
+├── style.css              # TUI styling
+└── README.md
 ```
 
 ---
 
-## 📻 Demo
+## 💡 About Hack Club's Waveband
 
-```bash
-📻 Frequency: 100.00 MHz
-[➖] [➕]
-
-~ Audio tone plays based on frequency ~
-~ Waveform reacts visually in real-time ~
-```
+When no RTL-SDR device is available, PyWaveRadio uses **mock IQ samples** from **Hack Club's Waveband initiative**, simulating a believable signal pattern to visualize and tune as if using real hardware.
 
 ---
 
-## 📦 Future Plans
+## 👤 Author
 
-* ✅ Add scan mode and bookmarks
-* ⏳ Real SDR input via SoapySDR + RTL-SDR dongle
-* ⏳ Web interface or cross-platform GUI
-* ⏳ Export bookmarks and session replay
+Built with ❤️ for Hack Club’s Waveband program.
 
----
-
-## 🛠️ Built By
-
-Devaansh Pathak
-Built for [Hack Club](https://hackclub.com/) Waveband program 🔩
+> Devaansh Pathak – [GitHub](https://github.com/devaansh-pathak)
 
 ---
 
-## ⚠️ Disclaimer
+## 🛠 License
 
-This is a **simulation** project. It does **not** receive real radio signals — yet!
+MIT License
