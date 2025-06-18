@@ -5,10 +5,11 @@ from textual.reactive import reactive
 from textual import events
 from textual.timer import Timer
 
-from radio.audio_simulator import play_tone, stop_audio
+from src.rtl_driver import RTL_TCPDriver  # Your SDR driver
 import json
 import os
 import random
+import numpy as np
 
 CONFIG_PATH = "config.json"
 
@@ -35,18 +36,22 @@ def get_band(frequency: float) -> str:
         return "FM"
     return "Unknown"
 
-
 class FrequencyDisplay(Static):
     def update_text(self, freq_mhz: float):
         band = get_band(freq_mhz)
         self.update(f"📻 Frequency: {freq_mhz:.2f} MHz\n🎙 Band: {band}")
 
-
 class WaveformDisplay(Static):
-    def update_waveform(self):
-        bar = ''.join(random.choice("▁▂▃▄▅▆▇█") for _ in range(40))
-        self.update(f"🎵 {bar}")
-
+    def update_waveform(self, samples=None):
+        try:
+            if samples is not None and len(samples) > 0:
+                real_vals = np.real(samples[:50])
+                bar = ''.join("█" if val > 0 else "▁" for val in real_vals)
+            else:
+                bar = ''.join(random.choice("▁▂▃▄▅▆▇█") for _ in range(40))
+            self.update(f"🎵 {bar}")
+        except Exception as e:
+            self.update(f"❌ Error: {e}")
 
 class RadioApp(App):
     CSS_PATH = "style.css"
@@ -73,10 +78,46 @@ class RadioApp(App):
         )
 
     def on_mount(self) -> None:
+        try:
+            self.driver = RTL_TCPDriver(freq_hz=self.frequency_mhz * 1e6)
+            self.freq_display.update_text(self.frequency_mhz)
+            self.waveform_timer: Timer = self.set_interval(0.8, self.update_waveform)
+            self.scan_timer: Timer | None = None
+        except Exception as e:
+            self.waveform.update(f"❌ Init failed: {e}")
+            self.driver = None
+            self.waveform_timer: Timer = self.set_interval(1.0, lambda: self.waveform.update_waveform())
+
+    def update_waveform(self):
+        try:
+            if self.driver:
+                samples = self.driver.get_samples(1)
+                self.waveform.update_waveform(samples)
+            else:
+                self.waveform.update_waveform()
+        except Exception as e:
+            self.waveform.update(f"❌ Waveform error: {e}")
+
+    def change_frequency(self, delta: float):
+        new_freq = round(self.frequency_mhz + delta, 2)
+        self.set_frequency(new_freq)
+
+    def set_frequency(self, value: float):
+        self.frequency_mhz = round(value, 2)
         self.freq_display.update_text(self.frequency_mhz)
-        play_tone(self.frequency_mhz * 10)
-        self.waveform_timer: Timer = self.set_interval(0.3, self.waveform.update_waveform)
-        self.scan_timer: Timer | None = None
+        save_frequency(self.frequency_mhz)
+        try:
+            if self.driver:
+                self.driver.set_frequency(self.frequency_mhz * 1e6)
+        except Exception as e:
+            self.waveform.update(f"⚠️ Freq error: {e}")
+
+    def scan_step(self):
+        if self.frequency_mhz >= 108.0:
+            self.scan_timer.stop()
+            self.notify("✅ Scan complete.")
+        else:
+            self.change_frequency(+0.5)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         button_id = event.button.id
@@ -103,24 +144,6 @@ class RadioApp(App):
                 self.notify("🔍 Starting scan...")
                 self.scan_timer = self.set_interval(1.0, self.scan_step)
 
-    def change_frequency(self, delta: float):
-        new_freq = round(self.frequency_mhz + delta, 2)
-        self.set_frequency(new_freq)
-
-    def set_frequency(self, value: float):
-        self.frequency_mhz = round(value, 2)
-        self.freq_display.update_text(self.frequency_mhz)
-        stop_audio()
-        play_tone(self.frequency_mhz * 10)
-        save_frequency(self.frequency_mhz)
-
-    def scan_step(self):
-        if self.frequency_mhz >= 108.0:
-            self.scan_timer.stop()
-            self.notify("✅ Scan complete.")
-        else:
-            self.change_frequency(+0.5)
-
     def on_key(self, event: events.Key) -> None:
         if event.key == "+":
             self.change_frequency(+0.1)
@@ -129,3 +152,14 @@ class RadioApp(App):
 
     def notify(self, message: str):
         self.waveform.update(f"🔔 {message}")
+
+    def on_exit(self) -> None:
+        try:
+            if self.driver:
+                self.driver.close()
+        except Exception:
+            pass
+
+if __name__ == "__main__":
+    app = RadioApp()
+    app.run()
