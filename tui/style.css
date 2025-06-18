@@ -1,0 +1,16 @@
+/* tui/style.css */
+Screen {
+  align: center middle;
+}
+Button {
+  margin: 1;
+  width: 6;
+}
+Static {
+  padding: 1;
+  border: round white;
+  content-align: center middle;
+}
+Button {
+  margin: 1;
+}
