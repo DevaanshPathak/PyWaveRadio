@@ -1,0 +1,26 @@
+Screen {
+  background: $background;
+  color: $text;
+}
+
+Static {
+  background: $panel;
+  border: tall $accent;
+  padding: 1;
+}
+
+Button {
+  background: $button;
+  color: $text;
+  border: round $accent;
+}
+
+Button:hover {
+  background: $accent;
+  color: black;
+}
+
+#bookmark-list {
+  border: heavy $accent;
+  padding: 1;
+}
