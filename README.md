@@ -1,62 +1,72 @@
-# 📻 PyWaveRadio TUI
+# 📻 PyWaveRadio
 
-**PyWaveRadio** is a Textual-based TUI (Text User Interface) SDR radio simulator that lets you tune virtual radio frequencies with a classic look and feel.
-
-It supports real SDR input via RTL-SDR and mock data from Hack Club's Waveband server — perfect for demos, exploration, and learning!
+**PyWaveRadio** is a terminal-based software-defined radio (SDR) interface with real-time waveform and spectrum visualization using RTL-SDR and a Textual TUI. It also includes a Matplotlib-powered spectrum GUI you can toggle from the terminal.
 
 ---
 
-## ✨ Features
+## 🛰️ Features
 
-- 🎛️ Frequency tuning (AM, SW, FM bands)
-- 🔖 Bookmark stations
-- 🔍 Frequency scanning mode
-- 🎵 Audio tone simulation per frequency
-- 📈 Dynamic waveform visualization (live IQ or simulated)
-- 💾 Saves last frequency tuned (`config.json`)
-- 💻 Fully works offline with mock data
-- 🧪 Real hardware support via `RTL_TCPDriver` (optional)
+- 🎛️ TUI-based frequency tuning (AM / SW / FM bands)
+- 📈 Real-time waveform and spectrum bars in terminal
+- 🔖 Save and load frequency bookmarks
+- 🌙 Light/Dark theme toggle
+- 🔍 Auto-scan mode
+- 📊 Optional external GUI spectrum viewer using Matplotlib
 
 ---
 
-## 🚦 How it works
+## 💻 Requirements
 
-- **Default mode**: Pulls **mock IQ data from Hack Club’s Waveband server** (offline, simulated)
-- **Real SDR mode**: If RTL-SDR is connected and SoapySDR is installed, it uses **live IQ samples** via `rtl_tcp`
-
-> 🔌 Auto-switches to mock data if no device is detected!
-
----
-
-## 🧰 Installation
-
-1. **Clone the repo**
-    ```bash
-    git clone https://github.com/yourname/pywaveradio
-    cd pywaveradio
-    ```
-
-2. **Install dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3. **(Optional) Install RTL-SDR support**
-    - Install [SoapySDR](https://github.com/pothosware/SoapySDR)
-    - Install [SoapyRTLSDR plugin](https://github.com/pothosware/SoapyRTLSDR)
-    - Connect an RTL-SDR dongle via USB
+- Python **3.9.x** (RTL-SDR bindings require 3.9)
+- RTL-SDR dongle or compatible SDR hardware
+- OS: Windows, Linux, or macOS
 
 ---
 
-## ▶️ Run the App
+## 📦 Installation
+
+### 1. Clone the repo
 
 ```bash
-python run_radio.py
+git clone https://github.com/your-username/PyWaveRadio.git
+cd PyWaveRadio
 ````
 
-Use `+` / `-` keys or buttons to change frequencies.
-Use preset buttons (AM / SW / FM) to jump to bands.
-Click "🔖 Save" to bookmark current frequency.
+### 2. Create a virtual environment (Python 3.9 required)
+
+```bash
+python3.9 -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# OR
+.venv\Scripts\activate  # Windows
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Install RTL-SDR driver
+
+Install `pyrtlsdr` or `SoapySDR`-based driver compatible with your RTL-SDR dongle.
+
+> On Windows, make sure the driver DLLs are in your PATH or project root.
+
+---
+
+## 🚀 Running the App
+
+```bash
+python run.py
+```
+
+Once inside the terminal UI:
+
+* `+` / `-` or buttons: Increase/decrease frequency
+* `b`: Open bookmarks menu
+* `t`: Toggle light/dark theme
+* `📈 GUI Spectrum`: Launch real-time Matplotlib spectrum viewer in separate window
 
 ---
 
@@ -64,32 +74,47 @@ Click "🔖 Save" to bookmark current frequency.
 
 ```
 PyWaveRadio/
-├── run_radio.py           # Entry point
-├── radio/
-│   ├── tui_app.py         # TUI logic
-│   ├── audio_simulator.py # Beep tone logic
-│   └── rtl_driver.py      # SDR + mock IQ sample logic
-├── config.json            # Stores last frequency
-├── style.css              # TUI styling
-└── README.md
+├── tui/
+│   └── app.py              # Main TUI code
+├── src/
+│   ├── rtl_driver.py       # RTL-SDR driver wrapper
+│   └── visualizer.py       # Spectrum GUI with matplotlib
+├── run.py                  # Entry point
+├── config.json             # Stores bookmarks & last state
+└── requirements.txt
 ```
 
 ---
 
-## 💡 About Hack Club's Waveband
+## ❗ Troubleshooting
 
-When no RTL-SDR device is available, PyWaveRadio uses **mock IQ samples** from **Hack Club's Waveband initiative**, simulating a believable signal pattern to visualize and tune as if using real hardware.
+### `AttributeError: 'RenderStyles' object has no attribute 'set_variables'`
 
----
+You're using a newer Textual method on an older version. Use `self.styles.background = ...` instead, or upgrade Textual if possible.
 
-## 👤 Author
+### `__init__() got an unexpected keyword argument 'show_cursor'`
 
-Built with ❤️ for Hack Club’s Waveband program.
-
-> Devaansh Pathak – [GitHub](https://github.com/devaansh-pathak)
+You're using `show_cursor=True` with an older version of `textual`. Remove that argument.
 
 ---
 
-## 🛠 License
+## 🛠️ Dependencies
 
-MIT License
+```txt
+textual==0.36.0
+numpy
+matplotlib
+rtlsdr  # or SoapySDR (based on rtl_driver implementation)
+```
+
+> You can adjust this list in `requirements.txt`.
+
+---
+
+## 📜 License
+
+MIT License — see `LICENSE` for details.
+
+---
+
+Made with ❤️ by Devaansh Pathak
