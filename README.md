@@ -28,7 +28,7 @@
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/PyWaveRadio.git
+git clone https://github.com/DevaanshPathak/PyWaveRadio.git
 cd PyWaveRadio
 ````
 
